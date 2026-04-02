@@ -93,6 +93,7 @@ public class shop : MonoBehaviour
             robotCountDisplay.AddRobot();
         bool isMaxed = item.count >= item.maxCount;
         shopText.UpdateDisplay(id, isMaxed ? -1 : items[id].costs[item.count], items[id].upgradeCost);
+
     }
 
     public void UpgradeItem(int id)
@@ -113,7 +114,7 @@ public class shop : MonoBehaviour
 
         item.upgradeCost *= 1.33f;
 
-        shopText.UpdateDisplay(id, -1, items[id].upgradeCost); // HARDCODE cuz we only have 1....
+        shopText.UpdateDisplay(id, -1, items[id].upgradeCost, true); // HARDCODE cuz we only have 1....
 
         StartCoroutine(HapticBurst());
 
