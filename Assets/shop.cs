@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.XR;
+using System.Collections;
+
 
 public class shop : MonoBehaviour
 {
@@ -11,6 +14,11 @@ public class shop : MonoBehaviour
 
     [Tooltip("Assign the RobotCountDisplay component to track and animate deployed robots.")]
     public RobotCountDisplay robotCountDisplay;
+
+    [Header("Power-up Juice")]
+    public float hapticDuration = 0.3f;
+    public float hapticAmplitude = 0.7f;
+    public ParticleSystem upgradeBurstParticles;
 
     void Start()
     {
@@ -41,6 +49,18 @@ public class shop : MonoBehaviour
         if (Keyboard.current.lKey.wasPressedThisFrame) BuyItem(4);
         if (Keyboard.current.vKey.wasPressedThisFrame) UpgradeItem(0);
         if (Keyboard.current.dKey.wasPressedThisFrame) UpgradeItem(1);
+    }
+
+    IEnumerator HapticBurst()
+    {
+        for (int i = 0; i < 20; i++)
+        {
+            UnityEngine.XR.InputDevice rightHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            UnityEngine.XR.InputDevice leftHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            rightHand.SendHapticImpulse(0, 1.0f, 0.3f);
+            leftHand.SendHapticImpulse(0, 1.0f, 0.3f);
+            yield return new WaitForSeconds(0.15f);
+        }
     }
 
     public void BuyItem(int id)
@@ -94,6 +114,12 @@ public class shop : MonoBehaviour
         item.upgradeCost *= 1.33f;
 
         shopText.UpdateDisplay(id, -1, items[id].upgradeCost); // HARDCODE cuz we only have 1....
+
+        StartCoroutine(HapticBurst());
+
+        // Particle burst
+        if (upgradeBurstParticles != null)
+            upgradeBurstParticles.Play();
     }
 }
 
