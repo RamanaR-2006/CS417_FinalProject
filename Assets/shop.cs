@@ -20,6 +20,9 @@ public class shop : MonoBehaviour
     public float hapticAmplitude = 0.7f;
     public ParticleSystem upgradeBurstParticles;
 
+    [Header("Generator Juice")]
+    public ParticleSystem generatorBurstParticles;
+
     void Start()
     {
         resourceManager = GetComponent<resource>();
@@ -94,6 +97,15 @@ public class shop : MonoBehaviour
         bool isMaxed = item.count >= item.maxCount;
         shopText.UpdateDisplay(id, isMaxed ? -1 : items[id].costs[item.count], items[id].upgradeCost);
 
+        // Haptics
+        UnityEngine.XR.InputDevice rightHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+        UnityEngine.XR.InputDevice leftHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+        rightHand.SendHapticImpulse(0, 0.5f, 0.3f);
+        leftHand.SendHapticImpulse(0, 0.5f, 0.3f);
+
+        // Particle burst
+        if (generatorBurstParticles != null)
+            generatorBurstParticles.Play();
     }
 
     public void UpgradeItem(int id)

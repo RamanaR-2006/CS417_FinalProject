@@ -2,7 +2,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.XR;
 using System.Collections;
-using static UnityEngine.ParticleSystem;
+using UnityEngine;
+
 
 
 public class resource : MonoBehaviour
@@ -58,7 +59,11 @@ public class resource : MonoBehaviour
     public AudioClip unlockSoundClip;
     public ParticleSystem unlockBurstParticles;
 
+    [Header("Trophy Juice")]
+    public AudioSource trophyAudioSource;
+    public AudioClip trophySoundClip;
 
+    public TutorialPopup tutorialPopup;
 
     void Start()
     {
@@ -156,6 +161,14 @@ public class resource : MonoBehaviour
         spawned.transform.localPosition = new Vector3(-21f, 0.5f, 7.0f + ((trophiesSpawned - 1) * 4f));
         spawned.transform.localRotation = Quaternion.identity;
         Debug.Log("Built a trophy!: " + trophiesSpawned);
+
+        // Sound
+        if (trophyAudioSource != null && trophySoundClip != null)
+            trophyAudioSource.PlayOneShot(trophySoundClip);
+
+        if (tutorialPopup != null)
+            tutorialPopup.ShowPopup("Achievement Unlocked!\nTrophy #" + trophiesSpawned);
+
     }
 
     string FormatResource(float value)
@@ -209,5 +222,9 @@ public class resource : MonoBehaviour
         // Particles
         if (unlockBurstParticles != null)
             unlockBurstParticles.Play();
+
+        if (tutorialPopup != null)
+            tutorialPopup.ShowPopup("You unlocked Joy!\nDeploy robots to generate more Joy.");
+
     }
 }
