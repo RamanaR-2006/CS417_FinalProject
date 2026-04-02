@@ -65,20 +65,73 @@ public class resource : MonoBehaviour
 
     public TutorialPopup tutorialPopup;
 
+    [Header("Prestige")]
+    public int prestigeLevel = 0;
+    public float prestigeMultiplier = 1f;
+    public TMP_Text prestigeText;
+    public ParticleSystem prestigeParticles;
+    public AudioSource prestigeAudioSource;
+    public AudioClip prestigeSoundClip;
+    public SaveManager saveManager;
+
     void Start()
     {
         baseScale = resourceText.transform.localScale;
         baseScale2 = rsrc2Text.transform.localScale;
     }
 
+    public void Prestige()
+    {
+        // Must have at least some progress to prestige
+        if (coins < 100f) return;
+
+        prestigeLevel++;
+        prestigeMultiplier = 1f + (prestigeLevel * 0.25f);
+
+        // Reset all counters
+        coins = 0f;
+        rate = 0.5f * prestigeMultiplier;
+        rsrc2 = 0f;
+        rate2 = 0f;
+        unlocked2 = false;
+        trophiesSpawned = 0;
+        butt.SetActive(true);
+
+        // Update prestige display
+        if (prestigeText != null)
+            prestigeText.text = "Prestige: " + prestigeLevel + " (x" + prestigeMultiplier.ToString("F2") + " bonus)";
+
+        // Juice
+        if (prestigeParticles != null)
+            prestigeParticles.Play();
+
+        if (prestigeAudioSource != null && prestigeSoundClip != null)
+            prestigeAudioSource.PlayOneShot(prestigeSoundClip);
+
+        StartCoroutine(PrestigeHaptic());
+
+        // Clear saves since we reset
+        if (saveManager != null)
+            saveManager.ClearSave();
+    }
+
+    IEnumerator PrestigeHaptic()
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            UnityEngine.XR.InputDevice rightHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.RightHand);
+            UnityEngine.XR.InputDevice leftHand = UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.LeftHand);
+            rightHand.SendHapticImpulse(0, 1.0f, 0.3f);
+            leftHand.SendHapticImpulse(0, 1.0f, 0.3f);
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
+
+
     public void updateRate(float inc)
     {
-        rate += inc;
-
-        // Ease: set a target scale bigger than 1 to trigger the punch
+        rate += inc * prestigeMultiplier;
         targetScale = 1.5f;
-
-        // Sound: play the clip spatialized at the resource text location
         if (rampingAudioSource != null && rampingSoundClip != null)
             rampingAudioSource.PlayOneShot(rampingSoundClip);
     }
