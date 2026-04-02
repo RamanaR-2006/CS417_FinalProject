@@ -32,6 +32,42 @@ public class resource : MonoBehaviour
     [Tooltip("Multiplier to scale emission rate relative to resource rate")]
     public float particleRateMultiplier = 5f;
 
+    // "juice" for particles. Sound and animation ease
+    [Header("Ramping Juice")]
+    public AudioSource rampingAudioSource;
+    public AudioClip rampingSoundClip;
+
+    private Vector3 baseScale;
+    private float scaleVelocity = 0f;
+    private float currentScale = 1f;
+    private float targetScale = 1f;
+    public float easeSpeed = 8f;
+
+    // Joy ease state
+    private Vector3 baseScale2;
+    private float currentScale2 = 1f;
+    private float targetScale2 = 1f;
+
+    void Start()
+    {
+        baseScale = resourceText.transform.localScale;
+        baseScale2 = rsrc2Text.transform.localScale;
+    }
+
+    public void updateRate(float inc)
+    {
+        rate += inc;
+
+        // Ease: set a target scale bigger than 1 to trigger the punch
+        targetScale = 1.5f;
+
+        // Sound: play the clip spatialized at the resource text location
+        if (rampingAudioSource != null && rampingSoundClip != null)
+            rampingAudioSource.PlayOneShot(rampingSoundClip);
+    }
+
+
+
     void Update()
     {
         // Euler integration
@@ -63,6 +99,22 @@ public class resource : MonoBehaviour
         {
             SpawnTrophy();
         }
+
+        // ease of particles
+        float easeDelta = easeSpeed * (targetScale - currentScale) * Time.deltaTime;
+        currentScale += easeDelta;
+        resourceText.transform.localScale = baseScale * currentScale;
+
+        // if reach punch target ease back to 1.0
+        if (targetScale > 1f && Mathf.Abs(currentScale - targetScale) < 0.01f)
+            targetScale = 1f;
+
+        float easeDelta2 = easeSpeed * (targetScale2 - currentScale2) * Time.deltaTime;
+        currentScale2 += easeDelta2;
+        rsrc2Text.transform.localScale = baseScale2 * currentScale2;
+
+        if (targetScale2 > 1f && Mathf.Abs(currentScale2 - targetScale2) < 0.01f)
+            targetScale2 = 1f;
     }
 
     // Function to update particle system rate
@@ -97,9 +149,6 @@ public class resource : MonoBehaviour
         else
             return value.ToString("F2"); // one decimal
     }
-    public void updateRate(float inc){
-        rate += inc;
-    }
 
     public void updateCoins(float delta) {
         coins += delta;
@@ -107,8 +156,16 @@ public class resource : MonoBehaviour
     public bool canBuy(float amount) {
         return coins >= amount;
     }
-    public void updateRate2(float inc){
+    public void updateRate2(float inc)
+    {
         rate2 += inc;
+
+        // Ease: punch the Joy text
+        targetScale2 = 1.5f;
+
+        // Sound: play the clip
+        if (rampingAudioSource != null && rampingSoundClip != null)
+            rampingAudioSource.PlayOneShot(rampingSoundClip);
     }
 
     public void updateRsrc2(float delta) {
