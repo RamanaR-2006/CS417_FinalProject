@@ -1,4 +1,4 @@
-# CS417_MP3
+# CS417 Final Project
 
 Contributors:
 Ramana Ramachandran
