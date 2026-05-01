@@ -98,6 +98,16 @@ public class ShopUI : MonoBehaviour
             targetScales[id] = punchScale;
     }
 
+    public void ResetAllDisplays(ShopItem[] items)
+    {
+        for (int i = 0; i < items.Length; i++)
+        {
+            buyCosts[i] = items[i].costs[0];
+            upgradeCosts[i] = items[i].upgradeCost;
+            RefreshRow(i);
+        }
+    }
+
     void RefreshRow(int id)
     {
         if (rows[id] == null) return;

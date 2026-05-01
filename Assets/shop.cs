@@ -10,6 +10,11 @@ public class shop : MonoBehaviour
     resource resourceManager;
     ShopUI shopText;
 
+    private GameObject[] spawnedObjects;
+    private float[] originalRates;
+    private float[] originalRates2;
+    private float[] originalUpgradeCosts;
+
     public Transform roomRoot;
 
     [Tooltip("Assign the RobotCountDisplay component to track and animate deployed robots.")]
@@ -27,24 +32,23 @@ public class shop : MonoBehaviour
     {
         resourceManager = GetComponent<resource>();
         shopText = GetComponent<ShopUI>();
+        spawnedObjects = new GameObject[items.Length * 10];
 
-        for (int i = 0; i < items.Length; i++) {
+        originalRates = new float[items.Length];
+        originalRates2 = new float[items.Length];
+        originalUpgradeCosts = new float[items.Length];
+
+        for (int i = 0; i < items.Length; i++)
+        {
+            originalRates[i] = items[i].rate;
+            originalRates2[i] = items[i].rate2;
+            originalUpgradeCosts[i] = items[i].upgradeCost;
             shopText.UpdateDisplay(i, items[i].costs[0], items[i].upgradeCost);
         }
     }
 
     void Update()
     {
-        #region Keyboard Input (Debug/Testing Only - Remove for final VR build)
-        if (Keyboard.current.cKey.wasPressedThisFrame) BuyItem(0);
-        if (Keyboard.current.sKey.wasPressedThisFrame) BuyItem(1);
-        if (Keyboard.current.wKey.wasPressedThisFrame) BuyItem(2);
-        if (Keyboard.current.mKey.wasPressedThisFrame) BuyItem(3);
-        if (Keyboard.current.lKey.wasPressedThisFrame) BuyItem(4);
-        if (Keyboard.current.vKey.wasPressedThisFrame) UpgradeItem(0);
-        if (Keyboard.current.dKey.wasPressedThisFrame) UpgradeItem(1);
-        #endregion
-
         if (Keyboard.current.cKey.wasPressedThisFrame) BuyItem(0);
         if (Keyboard.current.sKey.wasPressedThisFrame) BuyItem(1);
         if (Keyboard.current.wKey.wasPressedThisFrame) BuyItem(2);
@@ -86,12 +90,13 @@ public class shop : MonoBehaviour
             GameObject spawned = Instantiate(item.prefab, roomRoot);
             spawned.transform.position = spawnPoint.position;
             spawned.transform.rotation = spawnPoint.rotation;
+            spawnedObjects[id * 3 + count] = spawned;
         }
         Debug.Log("Bought " + item.itemName + " (" + item.count + "/" + item.maxCount + ")");
         resourceManager.updateRate(item.rate);
         resourceManager.updateRate2(item.rate2);
 
-        // Notify the robot counter — triggers the eased animation
+        // Notify the robot counter
         if (robotCountDisplay != null)
             robotCountDisplay.AddRobot();
         bool isMaxed = item.count >= item.maxCount;
@@ -107,17 +112,31 @@ public class shop : MonoBehaviour
         if (generatorBurstParticles != null)
             generatorBurstParticles.Play();
     }
+
     public void ResetShop()
     {
         ShopUI shopText = GetComponent<ShopUI>();
+
+        for (int i = 0; i < spawnedObjects.Length; i++)
+        {
+            if (spawnedObjects[i] != null)
+            {
+                Destroy(spawnedObjects[i]);
+                spawnedObjects[i] = null;
+            }
+        }
+
         for (int i = 0; i < items.Length; i++)
         {
             items[i].count = 0;
-            items[i].rate = items[i].rate;
-            items[i].rate2 = items[i].rate2;
-            shopText.UpdateDisplay(i, items[i].costs[0], items[i].upgradeCost);
+            items[i].rate = originalRates[i];
+            items[i].rate2 = originalRates2[i];
+            items[i].upgradeCost = originalUpgradeCosts[i];
         }
+
+        shopText.ResetAllDisplays(items);
     }
+
     public void UpgradeItem(int id)
     {
         ShopItem item = items[id];
@@ -136,7 +155,7 @@ public class shop : MonoBehaviour
 
         item.upgradeCost *= 1.33f;
 
-        shopText.UpdateDisplay(id, -1, items[id].upgradeCost, true); // HARDCODE cuz we only have 1....
+        shopText.UpdateDisplay(id, -1, items[id].upgradeCost, true);
 
         StartCoroutine(HapticBurst());
 

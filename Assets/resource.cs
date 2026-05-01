@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.XR;
 using System.Collections;
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 
 public class resource : MonoBehaviour
@@ -82,43 +82,24 @@ public class resource : MonoBehaviour
         baseScale2 = rsrc2Text.transform.localScale;
     }
 
-    public void Prestige()
+    public void ResetGame()
     {
-        // Must have at least some progress to prestige
-        if (coins < 100f) return;
-
-        prestigeLevel++;
-        prestigeMultiplier = 1f + (prestigeLevel * 0.25f);
-
-        // Reset all counters
-        coins = 0f;
-        rate = 0.5f * prestigeMultiplier;
-        rsrc2 = 0f;
-        rate2 = 0f;
-        unlocked2 = false;
-        trophiesSpawned = 0;
-        butt.SetActive(true);
-
-        // Update prestige display
-        if (prestigeText != null)
-            prestigeText.text = "Prestige: " + prestigeLevel + " (x" + prestigeMultiplier.ToString("F2") + " bonus)";
-
-        // Reset the shop
-        if (shopManager != null)
-            shopManager.ResetShop();
-
-        // Juice
-        if (prestigeParticles != null)
-            prestigeParticles.Play();
-
-        if (prestigeAudioSource != null && prestigeSoundClip != null)
-            prestigeAudioSource.PlayOneShot(prestigeSoundClip);
-
-        StartCoroutine(PrestigeHaptic());
-
-        // Clear saves since we reset
         if (saveManager != null)
             saveManager.ClearSave();
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    public void QuitGame()
+    {
+        if (saveManager != null)
+            saveManager.ClearSave();
+
+        #if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+        #else
+                Application.Quit();
+        #endif
     }
 
     IEnumerator PrestigeHaptic()
