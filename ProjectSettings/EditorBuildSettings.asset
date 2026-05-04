@@ -9,8 +9,17 @@ EditorBuildSettings:
     path: Assets/Scenes/SampleScene.unity
     guid: 99c9720ab356a0642a771bea13969a05
   - enabled: 1
+    path: Assets/Scenes/Farm_Scene.unity
+    guid: 78386ee599bd5b248a084e3a7e4cb764
+  - enabled: 1
     path: Assets/Scenes/Junk_Sim_V0.unity
     guid: 7f1dbd5b06931d240a2b49cb8ecc673e
+  - enabled: 1
+    path: Assets/Scenes/Farm_Scene_part2.unity
+    guid: 31dfc751e01d1e544b43a10b90fae5ad
+  - enabled: 1
+    path: Assets/Scenes/NPC_Scene.unity
+    guid: 089df31ed2400d44686b0a09153791b7
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 64ab9e699223c74409882b2326452677, type: 2}
